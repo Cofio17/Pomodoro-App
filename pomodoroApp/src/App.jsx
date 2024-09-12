@@ -30,6 +30,7 @@ function App() {
 
   //chatGPT je ovo radio
   const formatTime = (totalSeconds) => {
+    if (totalSeconds < 0) totalSeconds = 0;
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
 
@@ -67,7 +68,7 @@ function App() {
   const resetTimer = () => {
     setActive(false);
     setinputValue("");
-    setTimer();
+    setTimer(0);
     playSound(click);
   };
 
@@ -94,7 +95,9 @@ function App() {
         </div>
 
         <div className="container-buttons">
-          <button onClick={startTimer}>Start</button>
+          <button onClick={() => (timer <= 0 ? startTimer() : resetTimer())}>
+            {active ? "Reset" : "Start"}
+          </button>
           <button
             className={active ? "pastelGreen" : "pastelRed"}
             onClick={handlePause}
