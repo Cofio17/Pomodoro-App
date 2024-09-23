@@ -28,7 +28,6 @@ function App() {
     handleTimer();
   }, [active, timer]);
 
-  //chatGPT je ovo radio
   const formatTime = (totalSeconds) => {
     if (totalSeconds < 0) totalSeconds = 0;
     const minutes = Math.floor(totalSeconds / 60);
