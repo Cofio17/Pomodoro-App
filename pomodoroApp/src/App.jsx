@@ -1,46 +1,51 @@
-import { useEffect, useState, useRef, act } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { useEffect, useState } from "react";
 import "./App.css";
 import click from "./sounds/click.mp3";
 import clockRinging from "./sounds/ringing.mp3";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   const [timer, setTimer] = useState(0);
   const [active, setActive] = useState(false);
   const [inputValue, setinputValue] = useState("");
+  const [pause, setPause] = useState(false);
 
   useEffect(() => {
-    const handleTimer = () => {
-      if (active && timer > 0) {
-        setTimeout(() => {
-          setTimer((curr) => curr - 1);
-        }, 1000);
-      }
-    };
+    let interval;
 
+    if ((active || pause) && timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prevTimer) => prevTimer - 1);
+      }, 1000);
+    }
+
+    if (timer === 0 && active) {
+      setActive(false);
+      setTimer(300);
+      setPause(true);
+    }
     const alarmRinging = () => {
       playSound(clockRinging);
     };
     if (timer === 5) {
       alarmRinging();
     }
-    handleTimer();
-  }, [active, timer]);
+
+    return () => clearInterval(interval);
+  }, [active, timer, pause]);
 
   const formatTime = (totalSeconds) => {
     if (totalSeconds < 0) totalSeconds = 0;
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
 
-    // Ako je više od jednog sata, prikazuj "sati:minuti"
     if (minutes >= 60) {
       const hours = Math.floor(minutes / 60);
       const remainingMinutes = minutes % 60;
       return `${hours}:${remainingMinutes < 10 ? "0" : ""}${remainingMinutes}`;
     }
 
-    // Prikazuj "minuti:sekunde"
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
@@ -52,15 +57,19 @@ function App() {
     if (timer > 0) {
       setActive(!active);
       playSound(click);
+      setPause(true);
     }
   };
 
   const startTimer = () => {
-    if (inputValue !== "") {
+    if (inputValue.trim() !== "" && !isNaN(inputValue)) {
       setActive(true);
       setinputValue("");
       setTimer(parseInt(inputValue));
       playSound(click);
+      setPause(false);
+    } else {
+      toast.error("Postoji greska prilikom inputa, pokusajte brojevima...");
     }
   };
 
@@ -68,6 +77,7 @@ function App() {
     setActive(false);
     setinputValue("");
     setTimer(0);
+    setPause(true);
     playSound(click);
   };
 
@@ -95,16 +105,18 @@ function App() {
 
         <div className="container-buttons">
           <button onClick={() => (timer <= 0 ? startTimer() : resetTimer())}>
-            {active ? "Reset" : "Start"}
+            {active ? "Reset" : pause ? "Reset" : "Start"}
           </button>
+
           <button
             className={active ? "pastelGreen" : "pastelRed"}
             onClick={handlePause}
           >
-            {active ? "Pause" : "Start"}
+            {active ? "Pause" : "Pause"}
           </button>
         </div>
       </div>
+      <ToastContainer theme="dark" position="top-center" />
     </>
   );
 }
