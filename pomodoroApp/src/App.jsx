@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { act, useEffect, useState } from "react";
 import "./App.css";
 import click from "./sounds/click.mp3";
 import clockRinging from "./sounds/ringing.mp3";
@@ -25,11 +25,9 @@ function App() {
       setTimer(300);
       setPause(true);
     }
-    const alarmRinging = () => {
-      playSound(clockRinging);
-    };
+
     if (timer === 5) {
-      alarmRinging();
+      playSound(clockRinging);
     }
 
     return () => clearInterval(interval);
@@ -57,7 +55,7 @@ function App() {
     if (timer > 0) {
       setActive(!active);
       playSound(click);
-      setPause(true);
+      setPause(false);
     }
   };
 
@@ -65,7 +63,7 @@ function App() {
     if (inputValue.trim() !== "" && !isNaN(inputValue)) {
       setActive(true);
       setinputValue("");
-      setTimer(parseInt(inputValue));
+      setTimer(parseInt(inputValue) * 60);
       playSound(click);
       setPause(false);
     } else {
@@ -87,17 +85,19 @@ function App() {
 
   return (
     <>
-      <h1>Pomodoro APP by Cofi</h1>
+      <h1>Pomodoro APP powered by Filip Orcic</h1>
       <div className="container-timer">
         <input
           id="input"
           type="text"
           value={inputValue}
           onChange={handleInput}
-          placeholder="unesite vreme u sekundama"
+          placeholder="unesite vreme u minutama"
         />
 
-        <div className="naslov">{active ? "Ucenje" : "Pauza"}</div>
+        <div className="naslov">
+          {active ? "Ucenje" : timer === 0 ? "" : "Pauza"}
+        </div>
 
         <div className={`timer ${active ? "pastelBlue" : "pastelRed"}`}>
           <p>{formatTime(timer)}</p>
@@ -105,7 +105,7 @@ function App() {
 
         <div className="container-buttons">
           <button onClick={() => (timer <= 0 ? startTimer() : resetTimer())}>
-            {active ? "Reset" : pause ? "Reset" : "Start"}
+            {active ? "Reset" : timer === 0 ? "Start" : "Reset"}
           </button>
 
           <button
